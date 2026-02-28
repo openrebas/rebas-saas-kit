@@ -35,7 +35,6 @@ jobs:
       - name: Dependency review (GH built-in)
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
-        continue-on-error: true  # temporary until Dependency Graph is active
   secrets-scan:
     runs-on: ubuntu-latest
     steps:
