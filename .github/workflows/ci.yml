@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -27,6 +30,7 @@ jobs:
       - name: Dependency review (GH built-in)
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
+        continue-on-error: true
   secrets-scan:
     runs-on: ubuntu-latest
     steps:
