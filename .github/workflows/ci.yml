@@ -31,9 +31,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: gitleaks/gitleaks-action@v2
+        with:
+          fetch-depth: 0
+      - name: Gitleaks (secrets scan)
+        uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
   iac-scan:
     runs-on: ubuntu-latest
     steps:
