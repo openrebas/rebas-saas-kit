@@ -17,4 +17,3 @@ jobs:
     with:
       languages: 'javascript'
     secrets: inherit
-    continue-on-error: true
