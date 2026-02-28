@@ -1,0 +1,6 @@
+# CODEOWNERS
+# Set default owners per path. Adjust to your team.
+*       @massi @rebas-bot
+/docs/  @rebas-bot
+/src/   @builder-bot
+/tests/ @builder-bot

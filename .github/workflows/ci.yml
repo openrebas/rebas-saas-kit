@@ -1,0 +1,46 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node (for tooling)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install tooling
+        run: |
+          npm -g i @redocly/cli @stoplight/spectral-cli swagger-cli
+      - name: Lint (fallback)
+        run: echo "No linter configured yet"
+      - name: Test (fallback)
+        run: echo "No tests yet" && exit 0
+      - name: Validate OpenAPI (if present)
+        if: hashFiles('docs/api/**.yaml') != ''
+        run: |
+          redocly lint docs/api/openapi.yaml || spectral lint docs/api/openapi.yaml || true
+      - name: Dependency review (GH built-in)
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gitleaks/gitleaks-action@v2
+        with:
+          args: "detect --source . --no-git --redact"
+  iac-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkov IaC scan (optional)
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          quiet: true
+          soft_fail: true

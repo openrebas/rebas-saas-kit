@@ -1,0 +1,32 @@
+name: ADR Check
+on:
+  pull_request:
+
+jobs:
+  ensure-adr-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require ADR reference for arch/infra changes
+        uses: actions-ecosystem/action-regex-match@v2
+        id: pr
+        with:
+          text: ${{ github.event.pull_request.body }}
+          regex: 'ADR-[0-9]+'
+      - name: Detect architecture/infra changes
+        id: changed
+        run: |
+          files=$(git diff --name-only origin/${GITHUB_BASE_REF}...HEAD || true)
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$files" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      - name: Fail if changes touch arch/infra without ADR
+        if: >-
+          (steps.changed.outputs.files &&
+           (contains(steps.changed.outputs.files, 'docs/adr/') ||
+            contains(steps.changed.outputs.files, 'infra/') ||
+            contains(steps.changed.outputs.files, 'docs/api/') ))
+          && steps.pr.outputs.match == ''
+        run: |
+          echo "Missing ADR reference (e.g., ADR-0001) in PR body for architecture/infra/API changes" >&2
+          exit 1
