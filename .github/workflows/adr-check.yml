@@ -6,7 +6,7 @@ jobs:
   ensure-adr-reference:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Require ADR reference for arch/infra changes
         uses: actions-ecosystem/action-regex-match@v2
         id: pr

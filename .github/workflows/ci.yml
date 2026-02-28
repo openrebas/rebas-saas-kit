@@ -11,7 +11,7 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup Node (for tooling)
         if: hashFiles('package.json') != ''
         uses: actions/setup-node@v4
@@ -39,7 +39,7 @@ jobs:
   secrets-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Gitleaks (secrets scan)
@@ -49,7 +49,7 @@ jobs:
   iac-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Checkov IaC scan (optional)
         uses: bridgecrewio/checkov-action@v12
         with:
