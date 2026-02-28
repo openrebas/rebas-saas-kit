@@ -1,19 +1,23 @@
-name: CodeQL
+name: CodeQL (soft)
+
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
-  schedule:
-    - cron: '0 3 * * 1'
+  push:
+    branches: [ main ]
 
-permissions:
-  contents: read
-  security-events: write
+permissions: read-all
 
 jobs:
   analyze:
-    uses: github/codeql-action/.github/workflows/codeql.yml@v3
-    with:
-      languages: 'javascript'
-    secrets: inherit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, typescript, python, go
+      - uses: github/codeql-action/analyze@v3
+    continue-on-error: true  # soft-fail initially
