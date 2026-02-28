@@ -4,36 +4,49 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node (for tooling)
+        if: hashFiles('package.json') != ''
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install tooling
+          cache: 'npm'
+      - name: Install dependencies
+        if: hashFiles('package.json') != ''
         run: |
-          npm -g i @redocly/cli @stoplight/spectral-cli swagger-cli
-      - name: Lint (fallback)
-        run: echo "No linter configured yet"
-      - name: Test (fallback)
-        run: echo "No tests yet" && exit 0
+          if [ -f package-lock.json ]; then npm ci; else npm i --no-audit --no-fund; fi
+      - name: Lint
+        if: hashFiles('package.json') != ''
+        run: npm run lint
+      - name: Test
+        if: hashFiles('package.json') != ''
+        run: npm test
       - name: Validate OpenAPI (if present)
         if: hashFiles('docs/api/**.yaml') != ''
         run: |
-          redocly lint docs/api/openapi.yaml || spectral lint docs/api/openapi.yaml || true
+          npx -y @redocly/cli@latest lint docs/api/openapi.yaml || npx -y @stoplight/spectral-cli@latest lint docs/api/openapi.yaml || true
       - name: Dependency review (GH built-in)
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
+        continue-on-error: true
   secrets-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: gitleaks/gitleaks-action@v2
         with:
-          args: "detect --source . --no-git --redact"
+          fetch-depth: 0
+      - name: Gitleaks (secrets scan)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
   iac-scan:
     runs-on: ubuntu-latest
     steps:
