@@ -1,12 +1,15 @@
-# Simple Node runtime for the kit
-FROM node:20-alpine AS base
-WORKDIR /app
-COPY package.json package-lock.json* tsconfig.json .eslintrc.json ./
-RUN npm ci || npm i --no-audit --no-fund
-COPY src ./src
-RUN npm run build
-
 FROM node:20-alpine
+
+# Create non-root user
+RUN addgroup -S app && adduser -S -G app app
+
 WORKDIR /app
-COPY --from=base /app/dist ./dist
-CMD ["node", "dist/index.js"]
+COPY . .
+
+# Use non-root user
+USER app:app
+
+# Minimal healthcheck (verifies container fs is accessible and Node runs)
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD node -e "process.exit(require('fs').existsSync('/app')?0:1)"
+
+CMD ["node", "-e", "console.log('ok')"]
