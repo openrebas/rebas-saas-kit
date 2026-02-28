@@ -5,12 +5,11 @@ on:
     branches: [ main ]
   workflow_dispatch: {}
 
+permissions: read-all
+
 jobs:
   detect-and-flip:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      administration: write  # requires admin token via GITHUB_TOKEN or PAT with repo:admin
     env:
       REQUIRED_CHECKS: |-
         CodeQL (soft)
